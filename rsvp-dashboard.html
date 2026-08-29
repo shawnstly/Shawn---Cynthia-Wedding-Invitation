@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shawn &amp; Cynthia — RSVP Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Jost:wght@300;400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F0E7D5; --surface:#F8F1E4; --surface-2:#EFE5CE; --ink:#2B2117; --muted:#7B6E5B;
+    --line:rgba(43,33,23,.16); --gold:#A97E3C; --green:#5B7A4B; --red:#B25B43; --shadow:0 24px 54px -34px rgba(43,33,23,.42);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(1200px 600px at 50% -10%, #FBF5E9, transparent 60%),
+      var(--bg);
+    color:var(--ink);font-family:"Jost",system-ui,Arial,sans-serif;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;padding:28px 18px 60px}
+  .head{text-align:center;margin:14px 0 26px}
+  .head .mono{font-family:"Pinyon Script",cursive;color:var(--gold);font-size:clamp(2.6rem,9vw,3.6rem);line-height:1}
+  .head .kick{font-size:.7rem;letter-spacing:.42em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+  .card{width:100%;max-width:860px;background:var(--surface);border:1px solid var(--line);
+    border-radius:20px;box-shadow:var(--shadow);padding:26px}
+  /* gate */
+  .gate{max-width:420px;margin:0 auto;text-align:center}
+  .gate p{color:var(--muted);margin:0 0 18px}
+  .gate input{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);
+    color:var(--ink);font-size:1.05rem;font-family:"Cormorant Garamond",serif;text-align:center;letter-spacing:.06em}
+  .gate input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(169,126,60,.16)}
+  .btn{margin-top:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+    font-family:"Jost";font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;
+    padding:13px 26px;border-radius:999px;border:1px solid var(--gold);background:var(--gold);color:#FBF5E9;transition:.2s}
+  .btn.ghost{background:transparent;color:var(--muted);border-color:var(--line)}
+  .btn:hover{filter:brightness(1.05)}
+  .err{color:var(--red);font-size:.92rem;margin-top:12px;min-height:1.1em}
+  /* tiles */
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+  @media (max-width:620px){.tiles{grid-template-columns:repeat(2,1fr)}}
+  .tile{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:16px 14px;text-align:center}
+  .tile .n{font-family:"Cormorant Garamond",serif;font-weight:700;font-size:2.2rem;line-height:1;color:var(--ink)}
+  .tile.coming .n{color:var(--green)} .tile.decl .n{color:var(--red)} .tile.head .n{color:var(--gold)}
+  .tile .l{font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+  /* table */
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .bar .meta{font-size:.82rem;color:var(--muted)}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+  table{width:100%;border-collapse:collapse;font-size:.95rem;min-width:560px}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2)}
+  tr:last-child td{border-bottom:none}
+  .pill{display:inline-block;padding:3px 11px;border-radius:999px;font-size:.76rem;font-weight:500}
+  .pill.yes{background:rgba(91,122,75,.14);color:var(--green)}
+  .pill.no{background:rgba(178,91,67,.14);color:var(--red)}
+  .empty{text-align:center;color:var(--muted);padding:40px 10px}
+  .note{color:var(--muted)}
+  .foot{margin-top:16px;text-align:center}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="mono">Shawn &amp; Cynthia</div>
+    <div class="kick">RSVP Dashboard</div>
+  </div>
+
+  <div class="card" id="gate">
+    <div class="gate">
+      <p>Enter your dashboard password to view the replies.</p>
+      <input id="pw" type="password" placeholder="Password" autocomplete="off" />
+      <div><button class="btn" id="unlock">Unlock</button></div>
+      <div class="err" id="gateErr"></div>
+    </div>
+  </div>
+
+  <div class="card" id="panel" hidden>
+    <div class="tiles">
+      <div class="tile"><div class="n" id="tTotal">0</div><div class="l">Replies</div></div>
+      <div class="tile coming"><div class="n" id="tYes">0</div><div class="l">Accepting</div></div>
+      <div class="tile decl"><div class="n" id="tNo">0</div><div class="l">Declining</div></div>
+      <div class="tile head"><div class="n" id="tHead">0</div><div class="l">Guests coming</div></div>
+    </div>
+    <div class="bar">
+      <div class="meta" id="meta">—</div>
+      <div>
+        <button class="btn ghost" id="refresh" style="margin-top:0">Refresh</button>
+        <button class="btn ghost" id="logout" style="margin-top:0">Lock</button>
+      </div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Replied</th><th>Name</th><th>Coming</th><th>Guests</th><th>Note</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="empty" hidden>No replies yet — they'll appear here as guests respond. 💛</div>
+  </div>
+
+<script>
+  var FN='https://fqccgxwbuwtplvhrxsdm.supabase.co/functions/v1/rsvp-list';
+  var APIKEY='sb_publishable_VsId7vwrYWBa7ar-f-sQpg_JzIqC_jG';
+  var gate=document.getElementById('gate'), panel=document.getElementById('panel');
+  var pwEl=document.getElementById('pw'), gateErr=document.getElementById('gateErr');
+
+  function esc(s){return (s==null?'':String(s)).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  function fmt(iso){try{var d=new Date(iso);return d.toLocaleDateString(undefined,{day:'2-digit',month:'short'})+', '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});}catch(e){return iso;}}
+
+  function getKey(){try{return sessionStorage.getItem('sc_dash_key')||'';}catch(e){return window.__k||'';}}
+  function setKey(k){try{sessionStorage.setItem('sc_dash_key',k);}catch(e){window.__k=k;}}
+  function clearKey(){try{sessionStorage.removeItem('sc_dash_key');}catch(e){window.__k='';}}
+
+  function load(key){
+    gateErr.textContent='';
+    return fetch(FN,{headers:{'x-dashboard-key':key,'apikey':APIKEY,'Authorization':'Bearer '+APIKEY}})
+      .then(function(r){
+        if(r.status===401){throw new Error('wrong');}
+        if(!r.ok){throw new Error('http '+r.status);}
+        return r.json();
+      })
+      .then(function(data){ setKey(key); render(data); });
+  }
+
+  function render(data){
+    gate.hidden=true; panel.hidden=false;
+    var s=data.summary||{total:0,accepting:0,declining:0,guests_coming:0};
+    document.getElementById('tTotal').textContent=s.total;
+    document.getElementById('tYes').textContent=s.accepting;
+    document.getElementById('tNo').textContent=s.declining;
+    document.getElementById('tHead').textContent=s.guests_coming;
+    var rows=data.rows||[];
+    var tb=document.getElementById('rows'), empty=document.getElementById('empty');
+    tb.innerHTML='';
+    if(!rows.length){ empty.hidden=false; } else {
+      empty.hidden=true;
+      rows.forEach(function(r){
+        var tr=document.createElement('tr');
+        tr.innerHTML='<td>'+fmt(r.created_at)+'</td>'
+          +'<td><b>'+esc(r.name)+'</b></td>'
+          +'<td>'+(r.attending?'<span class="pill yes">Yes</span>':'<span class="pill no">No</span>')+'</td>'
+          +'<td>'+(r.attending?(r.guests||1):'—')+'</td>'
+          +'<td class="note">'+esc(r.note||'')+'</td>';
+        tb.appendChild(tr);
+      });
+    }
+    document.getElementById('meta').textContent='Updated '+new Date().toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})+' · '+rows.length+' shown';
+  }
+
+  document.getElementById('unlock').addEventListener('click',function(){
+    var k=(pwEl.value||'').trim();
+    if(!k){gateErr.textContent='Please enter the password.';return;}
+    load(k).catch(function(e){ gateErr.textContent = e.message==='wrong' ? 'Incorrect password.' : 'Could not load — check your connection and try again.'; });
+  });
+  pwEl.addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('unlock').click(); });
+  document.getElementById('refresh').addEventListener('click',function(){ load(getKey()).catch(function(){}); });
+  document.getElementById('logout').addEventListener('click',function(){ clearKey(); panel.hidden=true; gate.hidden=false; pwEl.value=''; });
+
+  // auto-open if a key is remembered this session
+  (function(){ var k=getKey(); if(k){ load(k).catch(function(){ clearKey(); }); } })();
+</script>
+</body>
+</html>
