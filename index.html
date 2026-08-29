@@ -570,6 +570,48 @@
   .rsvp .btn.solid[hidden]{display:none}
   .rsvp .btn.solid{animation:rsvpIn .5s ease}
   @keyframes rsvpIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .rsvp-form{display:flex;flex-direction:column;gap:14px;max-width:420px;margin:26px auto 0;animation:rsvpIn .5s ease}
+  .rsvp-form[hidden]{display:none}
+  .rsvp-input{width:100%;box-sizing:border-box;background:var(--surface-2);color:var(--ink);border:1px solid var(--line);
+    border-radius:14px;padding:14px 18px;font-family:"Cormorant Garamond",serif;font-size:1.12rem;letter-spacing:.02em;
+    transition:border-color .25s,box-shadow .25s;text-align:center}
+  .rsvp-input::placeholder{color:var(--muted);opacity:.85}
+  .rsvp-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(169,126,60,.16)}
+  .rsvp-input[hidden]{display:none}
+  .rsvp-note{resize:vertical;min-height:52px;line-height:1.5;text-align:left}
+  .rsvp-form .btn.solid{align-self:center;margin-top:6px}
+  .rsvp-status{margin:6px auto 0;font-size:1rem;letter-spacing:.02em;color:var(--muted);max-width:42ch;min-height:1.2em}
+  .rsvp-status[hidden]{display:none}
+  .rsvp-status.ok{color:var(--gold)}
+  .rsvp-status.err{color:#C0553D}
+  /* animated thank-you */
+  .rsvp-thanks{max-width:460px;margin:14px auto 0;text-align:center;animation:rsvpIn .6s ease}
+  .rsvp-thanks[hidden]{display:none}
+  .thanks-medal{position:relative;width:94px;height:94px;margin:0 auto 20px}
+  .thanks-check{width:94px;height:94px;display:block;position:relative;z-index:2;overflow:visible}
+  .thanks-check circle{fill:none;stroke:var(--gold);stroke-width:2;opacity:.5;
+    stroke-dasharray:151;stroke-dashoffset:151;animation:thDraw .7s ease forwards}
+  .thanks-check path{fill:none;stroke:var(--gold);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:40;stroke-dashoffset:40;animation:thDraw .55s ease .5s forwards}
+  @keyframes thDraw{to{stroke-dashoffset:0}}
+  .thanks-medal::after{content:"";position:absolute;inset:-10px;border-radius:50%;z-index:1;
+    background:radial-gradient(circle,rgba(169,126,60,.30),transparent 68%);opacity:0;animation:thGlow 1.3s ease .3s}
+  @keyframes thGlow{0%{opacity:0;transform:scale(.55)}40%{opacity:1}100%{opacity:0;transform:scale(1.6)}}
+  .thanks-title{font-family:"Pinyon Script",cursive;color:var(--gold);font-size:clamp(2.3rem,8vw,3.1rem);line-height:1;margin-bottom:12px}
+  .thanks-sub{color:var(--muted);font-size:1.06rem;letter-spacing:.02em;max-width:36ch;margin:0 auto;line-height:1.55}
+  .thanks-medal .heart{position:absolute;left:50%;top:52%;font-size:15px;color:var(--gold);opacity:0;pointer-events:none;z-index:3}
+  .rsvp-thanks.celebrate .heart{animation:thFloat 1.7s ease-out forwards}
+  .rsvp-thanks.celebrate .h1{animation-delay:.35s;--tx:-48px;--r:-18deg}
+  .rsvp-thanks.celebrate .h2{animation-delay:.5s;--tx:40px;--r:15deg}
+  .rsvp-thanks.celebrate .h3{animation-delay:.62s;--tx:-22px;--r:-8deg}
+  .rsvp-thanks.celebrate .h4{animation-delay:.74s;--tx:26px;--r:11deg}
+  .rsvp-thanks.celebrate .h5{animation-delay:.86s;--tx:-4px;--r:0deg}
+  @keyframes thFloat{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+    18%{opacity:1}
+    100%{opacity:0;transform:translate(calc(-50% + var(--tx,0px)),-170%) scale(1.1) rotate(var(--r,0))}}
+  .btn.ghost{margin-top:16px;background:transparent;color:var(--muted);border-color:var(--line);font-size:.6rem;padding:11px 22px}
+  .btn.ghost:hover,.btn.ghost:focus-visible{color:var(--on-accent);background:var(--gold);border-color:var(--gold)}
+  .btn.ghost[hidden]{display:none}
 
   /* footer */
   footer{padding:78px 0 94px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px}
@@ -1199,8 +1241,23 @@ body.entered .hero-bg{
         <span class="opt-label">Regretfully decline</span>
       </button>
     </div>
-    <a class="btn solid" id="rsvpWa" target="_blank" rel="noopener" href="#" hidden>Send your reply</a>
-    <small>Choose one, then send us a quick note. Prefer a call? We would love to hear from you.</small>
+    <div class="rsvp-form" id="rsvpForm" hidden>
+      <input id="rsvpName" class="rsvp-input" type="text" placeholder="Your name" maxlength="120" autocomplete="name" />
+      <input id="rsvpGuests" class="rsvp-input" type="number" min="1" max="20" value="1" inputmode="numeric" placeholder="Guests in your party" />
+      <textarea id="rsvpNote" class="rsvp-input rsvp-note" rows="2" maxlength="600" placeholder="A note for the couple (optional)"></textarea>
+      <button class="btn solid" id="rsvpSubmit" type="button">Send our reply</button>
+      <p class="rsvp-status" id="rsvpStatus" role="status" aria-live="polite" hidden></p>
+    </div>
+    <div class="rsvp-thanks" id="rsvpThanks" hidden>
+      <div class="thanks-medal">
+        <svg viewBox="0 0 52 52" class="thanks-check" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg>
+        <span class="heart h1">&#9829;</span><span class="heart h2">&#9829;</span><span class="heart h3">&#9829;</span><span class="heart h4">&#9829;</span><span class="heart h5">&#9829;</span>
+      </div>
+      <div class="thanks-title" id="thanksTitle">Thank you!</div>
+      <p class="thanks-sub" id="thanksSub"></p>
+    </div>
+    <a class="btn ghost" id="rsvpWa" target="_blank" rel="noopener" href="#" hidden>Add a personal note on WhatsApp</a>
+    <small>Choose one, add your name, and send. Prefer a call? We would love to hear from you.</small>
   </div>
 </section>
 
@@ -1241,17 +1298,71 @@ body.entered .hero-bg{
     m.textContent=pad(Math.floor(sec%3600/60));s.textContent=pad(sec%60);}
   tick();setInterval(tick,1000);
 
-  var PHONE='';   // couple's WhatsApp number (country code + number), e.g. '9198XXXXXXXX'
-  var waBtn=document.getElementById('rsvpWa'), rsvpOpts=[].slice.call(document.querySelectorAll('.rsvp-opt'));
+  /* ---- RSVP -> Supabase (save) + optional WhatsApp note (hybrid) ---- */
+  var SUPA_URL='https://fqccgxwbuwtplvhrxsdm.supabase.co';
+  var SUPA_KEY='sb_publishable_VsId7vwrYWBa7ar-f-sQpg_JzIqC_jG';
+  var PHONE='919986209779';   // Shawn's WhatsApp number for the optional guest note
+  var waBtn=document.getElementById('rsvpWa');
+  var rsvpForm=document.getElementById('rsvpForm');
+  var nameEl=document.getElementById('rsvpName');
+  var guestsEl=document.getElementById('rsvpGuests');
+  var noteEl=document.getElementById('rsvpNote');
+  var sendEl=document.getElementById('rsvpSubmit');
+  var statusEl=document.getElementById('rsvpStatus');
+  var rsvpOpts=[].slice.call(document.querySelectorAll('.rsvp-opt'));
+  var answer=null; // 'yes' | 'no'
+  function setStatus(t,kind){ statusEl.textContent=t||''; statusEl.hidden=!t; statusEl.className='rsvp-status'+(kind?(' '+kind):''); }
+  function showThanks(yes, nm){
+    ['.label','.script-h','.lead','.rsvp-choices','small'].forEach(function(sel){
+      var el=document.querySelector('.rsvp '+sel); if(el) el.style.display='none';
+    });
+    rsvpForm.hidden=true;
+    var t=document.getElementById('rsvpThanks');
+    document.getElementById('thanksTitle').textContent = yes ? ('Thank you, '+nm+'!') : ('Thank you, '+nm);
+    document.getElementById('thanksSub').textContent = yes
+      ? 'Your RSVP is saved — we can’t wait to celebrate with you on 13 September.'
+      : 'Your reply is saved — you’ll be dearly missed, and always in our hearts.';
+    t.hidden=false;
+    if(yes) t.classList.add('celebrate');
+    waBtn.hidden=false;
+    try{ t.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
+  }
+
   rsvpOpts.forEach(function(o){
     o.addEventListener('click',function(){
       rsvpOpts.forEach(function(x){ x.classList.remove('sel'); x.setAttribute('aria-pressed','false'); });
       o.classList.add('sel'); o.setAttribute('aria-pressed','true');
-      var yes=o.getAttribute('data-ans')==='yes';
+      answer=o.getAttribute('data-ans');
+      var yes=answer==='yes';
+      guestsEl.hidden=!yes;
+      rsvpForm.hidden=false; setStatus('');
       var msg = yes
         ? "Hi Shawn & Cynthia! We joyfully accept — we can't wait to celebrate with you on 13 Sep 2026. 💛"
         : "Hi Shawn & Cynthia! With regret we won't be able to attend on 13 Sep 2026, but we'll be celebrating you with all our love.";
       waBtn.href = (PHONE?('https://wa.me/'+PHONE):'https://wa.me/')+'?text='+encodeURIComponent(msg);
+      try{ nameEl.focus(); }catch(e){}
+    });
+  });
+
+  sendEl.addEventListener('click',function(){
+    var name=(nameEl.value||'').trim();
+    if(!answer){ setStatus('Please choose Accept or Decline first.','err'); return; }
+    if(!name){ setStatus('Please enter your name.','err'); try{nameEl.focus();}catch(e){} return; }
+    var yes=answer==='yes';
+    var guests=yes?Math.max(1,Math.min(20,parseInt(guestsEl.value,10)||1)):1;
+    var note=(noteEl.value||'').trim();
+    sendEl.disabled=true; setStatus('Sending your reply…');
+    fetch(SUPA_URL+'/rest/v1/rsvps',{
+      method:'POST',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({name:name,attending:yes,guests:guests,note:note||null})
+    }).then(function(r){
+      if(r.ok){
+        showThanks(yes, name);
+      } else { throw new Error('HTTP '+r.status); }
+    }).catch(function(){
+      sendEl.disabled=false;
+      setStatus('Could not save just now — please try again, or use the WhatsApp button below.','err');
       waBtn.hidden=false;
     });
   });
